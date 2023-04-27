@@ -21,6 +21,8 @@ import androidx.core.content.ContextCompat;
 import java.io.File;
 import java.io.IOException;
 
+import client.PathologyPredictionClient;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
@@ -35,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean mPermissionToRecordAccepted = false;
     private String mOutputFilePath;
+    private String[] audioPaths;
     private MediaRecorder mRecorder;
 
     private int mStep = 1;
@@ -48,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
         mImageView = findViewById(R.id.image_view);
         mRecordingTextView = findViewById(R.id.recording_text_view);
         mStopButton = findViewById(R.id.stop_button);
+
+        this.audioPaths = new String[3];
 
         // Disable stop button until recording starts
         mStopButton.setEnabled(false);
@@ -91,12 +96,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void startRecording() {
         // Set output file path for audio recording
-        mOutputFilePath = getExternalCacheDir().getAbsolutePath() + "/record_" + mStep + ".3gp";
+        mOutputFilePath = getExternalCacheDir().getAbsolutePath() + "/audio" + mStep + ".ogg";
         mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.OGG);
         mRecorder.setOutputFile(mOutputFilePath);
-        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.OPUS);
 
         try {
             mRecorder.prepare();
@@ -117,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
         mRecorder.stop();
         mRecorder.release();
         mRecorder = null;
+        audioPaths[mStep-1] = mOutputFilePath;
 
         // Update UI
         mStopButton.setEnabled(false);
@@ -148,8 +154,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String performPrediction() {
-        // Perform prediction logic here and return result string
-        return "Prediction result";
+        String result =
+                PathologyPredictionClient.predict(new File(audioPaths[0]), new File(audioPaths[1]), new File(audioPaths[2]));
+//         Perform prediction logic here and return result string
+        return "Prediction result: " + result;
     }
 
     @Override
