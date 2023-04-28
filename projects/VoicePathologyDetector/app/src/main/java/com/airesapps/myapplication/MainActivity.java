@@ -2,16 +2,20 @@ package com.airesapps.myapplication;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.media.MediaRecorder;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
-import android.os.SystemClock;
+import android.os.Looper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.RelativeLayout.LayoutParams;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,8 +24,10 @@ import androidx.core.content.ContextCompat;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import client.PathologyPredictionClient;
+import com.airesapps.client.PathologyPredictionClient;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -34,6 +40,11 @@ public class MainActivity extends AppCompatActivity {
     private ImageView mImageView;
     private TextView mRecordingTextView;
     private Button mStopButton;
+
+    private ProgressBar mProgressBar;
+
+    private String predictionResult;
+
 
     private boolean mPermissionToRecordAccepted = false;
     private String mOutputFilePath;
@@ -51,6 +62,9 @@ public class MainActivity extends AppCompatActivity {
         mImageView = findViewById(R.id.image_view);
         mRecordingTextView = findViewById(R.id.recording_text_view);
         mStopButton = findViewById(R.id.stop_button);
+        mProgressBar = findViewById(R.id.progressBar);
+
+
 
         this.audioPaths = new String[3];
 
@@ -94,14 +108,29 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+//    private void configureProgressBar() {
+//        mProgressBar = new ProgressBar(getApplicationContext(), null, android.R.attr.progressBarStyleHorizontal);
+//        LayoutParams lp = new LayoutParams(
+//                550, // Width in pixels
+//                LayoutParams.WRAP_CONTENT // Height of progress bar
+//        );
+//        mProgressBar.setLayoutParams(lp);
+//        LayoutParams params = (LayoutParams) mProgressBar.getLayoutParams();
+//        params.addRule(RelativeLayout.ABOVE, mImageView.getId());
+//        mProgressBar.setLayoutParams(params);
+//        mProgressBar.getProgressDrawable().setColorFilter(Color.GRAY, PorterDuff.Mode.SRC_IN);
+//    }
+
     private void startRecording() {
         // Set output file path for audio recording
-        mOutputFilePath = getExternalCacheDir().getAbsolutePath() + "/audio" + mStep + ".ogg";
+        mOutputFilePath = getExternalCacheDir().getAbsolutePath() + "/audio" + mStep + ".mp4";
         mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.OGG);
+        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         mRecorder.setOutputFile(mOutputFilePath);
-        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.OPUS);
+        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+        mRecorder.setAudioSamplingRate(50000);
+        mRecorder.setAudioEncodingBitRate(800000);
 
         try {
             mRecorder.prepare();
@@ -154,10 +183,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String performPrediction() {
-        String result =
-                PathologyPredictionClient.predict(new File(audioPaths[0]), new File(audioPaths[1]), new File(audioPaths[2]));
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
+        mProgressBar.setVisibility(View.VISIBLE);
+
+        executor.execute(() -> {
+            predictionResult =
+                    PathologyPredictionClient.predict(new File(audioPaths[0]),
+                            new File(audioPaths[1]), new File(audioPaths[2]));
+            handler.post(() -> {
+                mProgressBar.setVisibility(View.GONE);
+            });
+        });
+
+        return "Prediction result: " + predictionResult;
+
 //         Perform prediction logic here and return result string
-        return "Prediction result: " + result;
+
     }
 
     @Override
