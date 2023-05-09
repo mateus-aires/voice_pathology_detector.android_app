@@ -13,11 +13,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -29,6 +31,8 @@ import java.util.concurrent.Executors;
 
 import com.airesapps.client.PathologyPredictionClient;
 import com.airesapps.dto.PredictionDTO;
+import com.airesapps.instructions.InstructionsAdapter;
+import com.airesapps.instructions.InstructionsUtil;
 import com.airesapps.util.Constants;
 
 public class MainActivity extends AppCompatActivity {
@@ -55,6 +59,9 @@ public class MainActivity extends AppCompatActivity {
     private String[] audioPaths;
     private MediaRecorder mRecorder;
 
+    private ListView lvInstructions;
+    private ImageView mHelp;
+
     private int mStep = 1;
 
     private boolean mIsRecording = false;
@@ -71,6 +78,19 @@ public class MainActivity extends AppCompatActivity {
         mProgressBar = findViewById(R.id.progressBar);
         mChronometer = findViewById(R.id.chronometer);
         mProgressBar.setVisibility(View.INVISIBLE);
+
+        lvInstructions = new ListView(this);
+        InstructionsAdapter adapter = new InstructionsAdapter(this, InstructionsUtil.getInstructionsList());
+        lvInstructions.setAdapter(adapter);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle("Instruções")
+                .setView(lvInstructions);
+
+        final AlertDialog dialog = builder.create();
+
+        mHelp = findViewById(R.id.help_view);
+        mHelp.setOnClickListener(v -> dialog.show());
 
         mRestart = findViewById(R.id.restart_view);
         mRestart.setOnClickListener(v -> {
