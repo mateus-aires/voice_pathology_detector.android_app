@@ -1,10 +1,14 @@
 package com.airesapps.dto;
+
 import com.google.gson.annotations.SerializedName;
 
 public class PredictionDTO {
 
     @SerializedName("result")
     private boolean result;
+
+    @SerializedName("probability")
+    private double probability;
 
     @SerializedName("pred1")
     private double pred1;
@@ -14,6 +18,37 @@ public class PredictionDTO {
 
     @SerializedName("pred3")
     private double pred3;
+
+    @SerializedName("is_successful")
+    private boolean isSuccessful;
+
+    @SerializedName("error_cause")
+    private String errorCause;
+
+    public boolean isSuccessful() {
+        return isSuccessful;
+    }
+
+    public void setSuccessful(boolean successful) {
+        isSuccessful = successful;
+    }
+
+    public double getProbability() {
+        return probability;
+    }
+
+    public void setProbability(double probability) {
+        this.probability = probability;
+    }
+
+    public String getErrorCause() {
+        return errorCause;
+    }
+
+    public void setErrorCause(String errorCause) {
+        this.errorCause = errorCause;
+    }
+
 
     public boolean getResult() {
         return result;

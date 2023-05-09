@@ -30,6 +30,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.airesapps.client.PathologyPredictionClient;
+import com.airesapps.dto.PredictionDTO;
+import com.airesapps.util.Constants;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 
@@ -47,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ProgressBar mProgressBar;
 
-    private String predictionResult;
+    private PredictionDTO predictionDTO;
 
 
     private boolean mPermissionToRecordAccepted = false;
@@ -70,7 +72,6 @@ public class MainActivity extends AppCompatActivity {
         mProgressBar.setVisibility(View.INVISIBLE);
 
 
-
         this.audioPaths = new String[3];
 
         // Disable stop button until recording starts
@@ -84,47 +85,27 @@ public class MainActivity extends AppCompatActivity {
             mPermissionToRecordAccepted = true;
         }
 
-        mImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mPermissionToRecordAccepted) {
-                    startRecording();
-                } else {
-                    ActivityCompat.requestPermissions(MainActivity.this, PERMISSIONS, REQUEST_RECORD_AUDIO_PERMISSION);
-                }
+        mImageView.setOnClickListener(v -> {
+            if (mPermissionToRecordAccepted) {
+                startRecording();
+            } else {
+                ActivityCompat.requestPermissions(MainActivity.this, PERMISSIONS, REQUEST_RECORD_AUDIO_PERMISSION);
             }
         });
 
-        mStopButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                stopRecording();
-                if (mStep < 3) {
-                    mStep++;
-                    updateUI();
-                } else {
-                    // Perform prediction and display result
-                    String predictionResult = performPrediction();
-                    Toast.makeText(MainActivity.this, predictionResult, Toast.LENGTH_SHORT).show();
-                    // Enable record button to allow user to record again
-                    mImageView.setEnabled(true);
-                }
+        mStopButton.setOnClickListener(v -> {
+            stopRecording();
+            if (mStep < 3) {
+                mStep++;
+                updateUI();
+            } else {
+                // Perform prediction and display result
+                performPrediction();
+                // Enable record button to allow user to record again
+                mImageView.setEnabled(true);
             }
         });
     }
-
-//    private void configureProgressBar() {
-//        mProgressBar = new ProgressBar(getApplicationContext(), null, android.R.attr.progressBarStyleHorizontal);
-//        LayoutParams lp = new LayoutParams(
-//                550, // Width in pixels
-//                LayoutParams.WRAP_CONTENT // Height of progress bar
-//        );
-//        mProgressBar.setLayoutParams(lp);
-//        LayoutParams params = (LayoutParams) mProgressBar.getLayoutParams();
-//        params.addRule(RelativeLayout.ABOVE, mImageView.getId());
-//        mProgressBar.setLayoutParams(params);
-//        mProgressBar.getProgressDrawable().setColorFilter(Color.GRAY, PorterDuff.Mode.SRC_IN);
-//    }
 
     private void startRecording() {
         // Set output file path for audio recording
@@ -152,35 +133,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void stopRecording() {
-        // Stop recording and release resources
         mRecorder.stop();
         mRecorder.reset();
         mRecorder.release();
         mRecorder = null;
 
-//
-//        SimpleExoPlayer player = new SimpleExoPlayer.Builder(this).build();
-//        MediaItem mediaItem = MediaItem.fromUri(mOutputFilePath);
-//        player.setMediaItem(mediaItem);
-//        player.prepare();
-//        player.play();
-
-
-
-
-        audioPaths[mStep-1] = mOutputFilePath;
+        audioPaths[mStep - 1] = mOutputFilePath;
 
         // Update UI
         mStopButton.setEnabled(false);
         mRecordingTextView.setVisibility(View.INVISIBLE);
         // Delay to prevent recording from being restarted too quickly
         Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                // Enable record button to allow user to record again
-                mImageView.setEnabled(true);
-            }
+        handler.postDelayed(() -> {
+            // Enable record button to allow user to record again
+            mImageView.setEnabled(true);
         }, 500);
 
     }
@@ -199,26 +166,62 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private String performPrediction() {
-
+    private void performPrediction() {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
         mProgressBar.setVisibility(View.VISIBLE);
 
         executor.execute(() -> {
-            predictionResult =
-                    PathologyPredictionClient.predict(new File(audioPaths[0]),
-                            new File(audioPaths[1]), new File(audioPaths[2]));
-            handler.post(() -> {
-                mProgressBar.setVisibility(View.GONE);
-            });
+            try {
+                predictionDTO =
+                        PathologyPredictionClient.predict(new File(audioPaths[0]),
+                                new File(audioPaths[1]), new File(audioPaths[2]));
+                handler.post(() -> {
+                    mProgressBar.setVisibility(View.GONE);
+                    handleResponse();
+                });
+            } catch (Exception e) {
+                handler.post(() -> {
+                    mProgressBar.setVisibility(View.GONE);
+                    handleResponse();
+                });
+            }
         });
-
-        return "Prediction result: " + predictionResult;
-
-//         Perform prediction logic here and return result string
-
     }
+
+    private void handleResponse() {
+        if (predictionDTO.isSuccessful()) {
+            displayResult();
+        } else {
+            displayError();
+        }
+    }
+
+    private void displayResult() {
+        String presentResult = getPredictionString();
+        Toast.makeText(this, presentResult, Toast.LENGTH_SHORT).show();
+        mTextView.setText(presentResult);
+    }
+
+    private void displayError() {
+        String errorMessage = Constants.INTERNAL_ERROR_MESSAGE;
+        if (predictionDTO != null) {
+            errorMessage = predictionDTO.getErrorCause();
+        }
+
+        mTextView.setText(errorMessage);
+        Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
+    }
+
+    private String getPredictionString() {
+        int predictionProbability = (int) Math.round(predictionDTO.getProbability() * 100);
+        String presentResult = Constants.FALSE_PREDICTION_MESSAGE;
+        if (predictionDTO.getResult()) {
+            presentResult = Constants.TRUE_PREDICTION_MESSAGE;
+        }
+        return String.format(Constants.PRESENT_MESSAGE_FORMAT, presentResult, predictionProbability);
+    }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
