@@ -22,7 +22,7 @@ public class PredictionDTO {
     @SerializedName("is_successful")
     private boolean isSuccessful;
 
-    @SerializedName("error_cause")
+    @SerializedName("error_message")
     private String errorCause;
 
     public boolean isSuccessful() {

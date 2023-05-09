@@ -19,7 +19,7 @@ public class PathologyPredictionClient {
 
     public static PredictionDTO predict(File audioFile1, File audioFile2, File audioFile3) {
 
-        String url = LOCAL_URL;
+        String url = PROD_URL;
         OkHttpClient client = new OkHttpClient();
 
         RequestBody requestBody = new MultipartBody.Builder()

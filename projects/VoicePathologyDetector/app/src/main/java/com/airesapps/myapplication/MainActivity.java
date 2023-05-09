@@ -1,23 +1,21 @@
 package com.airesapps.myapplication;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
-import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
+import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Chronometer;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.RelativeLayout.LayoutParams;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -41,11 +39,13 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private TextView mTextView;
-    private ImageView mImageView;
+    private ImageView mStartStopImageView;
+    private ImageView mAudioWave;
     private TextView mRecordingTextView;
-    private Button mStopButton;
+    private ImageView mRestart;
 
     private ProgressBar mProgressBar;
+    private Chronometer mChronometer;
 
     private PredictionDTO predictionDTO;
 
@@ -57,22 +57,31 @@ public class MainActivity extends AppCompatActivity {
 
     private int mStep = 1;
 
+    private boolean mIsRecording = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         mTextView = findViewById(R.id.text_view);
-        mImageView = findViewById(R.id.image_view);
+        mStartStopImageView = findViewById(R.id.image_view);
         mRecordingTextView = findViewById(R.id.recording_text_view);
+        mAudioWave = findViewById(R.id.audiowave);
         mProgressBar = findViewById(R.id.progressBar);
+        mChronometer = findViewById(R.id.chronometer);
         mProgressBar.setVisibility(View.INVISIBLE);
+
+        mRestart = findViewById(R.id.restart_view);
+        mRestart.setOnClickListener(v -> {
+            Intent intent = getIntent();
+            finish();
+            startActivity(intent);
+        });
 
 
         this.audioPaths = new String[3];
 
-        // Disable stop button until recording starts
-        mStopButton.setEnabled(false);
 
         // Check if permission to record audio is granted
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
@@ -82,24 +91,41 @@ public class MainActivity extends AppCompatActivity {
             mPermissionToRecordAccepted = true;
         }
 
-        mImageView.setOnClickListener(v -> {
-            if (mPermissionToRecordAccepted) {
+        mStartStopImageView.setOnClickListener(v -> {
+            if (!mIsRecording) {
                 startRecording();
-            } else {
-                ActivityCompat.requestPermissions(MainActivity.this, PERMISSIONS, REQUEST_RECORD_AUDIO_PERMISSION);
-            }
-        });
+                mStartStopImageView.setImageResource(R.drawable.stop_ic);
 
-        mStopButton.setOnClickListener(v -> {
-            stopRecording();
-            if (mStep < 3) {
-                mStep++;
-                updateUI();
+                mAudioWave.setVisibility(View.VISIBLE);
+                mRecordingTextView.setVisibility(View.VISIBLE);
+
+                mChronometer.setVisibility(View.VISIBLE);
+                mChronometer.setBase(SystemClock.elapsedRealtime());
+                mChronometer.setFormat("mm:ss");
+                mChronometer.start();
+                mChronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
+                    @Override
+                    public void onChronometerTick(Chronometer chronometer) {
+                        long elapsedMillis = SystemClock.elapsedRealtime() - chronometer.getBase();
+                        if (elapsedMillis >= 8000) {
+                            stopRecording();
+                            mStartStopImageView.setImageResource(R.drawable.record_ic);
+                            mChronometer.stop();
+                            mChronometer.setVisibility(View.INVISIBLE);
+                        } else {
+                            chronometer.setText(DateFormat.format("mm:ss", elapsedMillis));
+                        }
+                    }
+                });
             } else {
-                // Perform prediction and display result
-                performPrediction();
-                // Enable record button to allow user to record again
-                mImageView.setEnabled(true);
+                stopRecording();
+                mStartStopImageView.setImageResource(R.drawable.record_ic);
+
+                mAudioWave.setVisibility(View.INVISIBLE);
+                mRecordingTextView.setVisibility(View.INVISIBLE);
+
+                mChronometer.stop();
+                mChronometer.setVisibility(View.INVISIBLE);
             }
         });
     }
@@ -123,10 +149,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Start recording and update UI
         mRecorder.start();
-        mImageView.setEnabled(false);
-        mStopButton.setEnabled(true);
-        mRecordingTextView.setVisibility(View.VISIBLE);
-        updateUI();
+        mIsRecording = true;
+//        mRecordingTextView.setVisibility(View.VISIBLE);
+//        mChronometer.setVisibility(View.VISIBLE);
     }
 
     private void stopRecording() {
@@ -138,14 +163,14 @@ public class MainActivity extends AppCompatActivity {
         audioPaths[mStep - 1] = mOutputFilePath;
 
         // Update UI
-        mStopButton.setEnabled(false);
-        mRecordingTextView.setVisibility(View.INVISIBLE);
-        // Delay to prevent recording from being restarted too quickly
-        Handler handler = new Handler();
-        handler.postDelayed(() -> {
-            // Enable record button to allow user to record again
-            mImageView.setEnabled(true);
-        }, 500);
+        mIsRecording = false;
+//        mRecordingTextView.setVisibility(View.INVISIBLE);
+        mStep++;
+        updateUI();
+        if (mStep > 3) {
+            // Perform prediction and display result
+            performPrediction();
+        }
 
     }
 
@@ -160,6 +185,9 @@ public class MainActivity extends AppCompatActivity {
             case 3:
                 mTextView.setText(R.string.step_3);
                 break;
+            case 4:
+                mTextView.setText(R.string.processing);
+                break;
         }
     }
 
@@ -172,7 +200,8 @@ public class MainActivity extends AppCompatActivity {
             try {
                 predictionDTO =
                         PathologyPredictionClient.predict(new File(audioPaths[0]),
-                                new File(audioPaths[1]), new File(audioPaths[2]));
+                                                          new File(audioPaths[1]),
+                                                          new File(audioPaths[2]));
                 handler.post(() -> {
                     mProgressBar.setVisibility(View.GONE);
                     handleResponse();
@@ -195,18 +224,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void displayResult() {
+        mStartStopImageView.setImageResource(R.drawable.result_ic);
+        mStartStopImageView.setClickable(false);
         String presentResult = getPredictionString();
         Toast.makeText(this, presentResult, Toast.LENGTH_SHORT).show();
         mTextView.setText(presentResult);
+
     }
 
     private void displayError() {
         String errorMessage = Constants.INTERNAL_ERROR_MESSAGE;
-        if (predictionDTO != null) {
-            errorMessage = predictionDTO.getErrorCause();
+        if (!mPermissionToRecordAccepted) {
+            errorMessage = Constants.PERMISSION_DENIED_MESSAGE;
         }
 
+        else if (predictionDTO != null) {
+            errorMessage = predictionDTO.getErrorCause();
+        }
+        mStartStopImageView.setImageResource(R.drawable.error_icon);
         mTextView.setText(errorMessage);
+        mStartStopImageView.setClickable(false);
         Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
     }
 
@@ -228,7 +265,7 @@ public class MainActivity extends AppCompatActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 mPermissionToRecordAccepted = true;
             } else {
-                Toast.makeText(this, "Permission denied to record audio", Toast.LENGTH_SHORT).show();
+                displayError();
             }
         }
     }
