@@ -32,8 +32,6 @@ import java.util.concurrent.Executors;
 import com.airesapps.client.PathologyPredictionClient;
 import com.airesapps.dto.PredictionDTO;
 import com.airesapps.util.Constants;
-import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.SimpleExoPlayer;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -67,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
         mTextView = findViewById(R.id.text_view);
         mImageView = findViewById(R.id.image_view);
         mRecordingTextView = findViewById(R.id.recording_text_view);
-        mStopButton = findViewById(R.id.stop_button);
         mProgressBar = findViewById(R.id.progressBar);
         mProgressBar.setVisibility(View.INVISIBLE);
 
