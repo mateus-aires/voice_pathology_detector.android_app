@@ -4,8 +4,10 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
@@ -28,6 +30,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.airesapps.client.PathologyPredictionClient;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.SimpleExoPlayer;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -63,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
         mRecordingTextView = findViewById(R.id.recording_text_view);
         mStopButton = findViewById(R.id.stop_button);
         mProgressBar = findViewById(R.id.progressBar);
+        mProgressBar.setVisibility(View.INVISIBLE);
 
 
 
@@ -149,8 +154,20 @@ public class MainActivity extends AppCompatActivity {
     private void stopRecording() {
         // Stop recording and release resources
         mRecorder.stop();
+        mRecorder.reset();
         mRecorder.release();
         mRecorder = null;
+
+//
+//        SimpleExoPlayer player = new SimpleExoPlayer.Builder(this).build();
+//        MediaItem mediaItem = MediaItem.fromUri(mOutputFilePath);
+//        player.setMediaItem(mediaItem);
+//        player.prepare();
+//        player.play();
+
+
+
+
         audioPaths[mStep-1] = mOutputFilePath;
 
         // Update UI

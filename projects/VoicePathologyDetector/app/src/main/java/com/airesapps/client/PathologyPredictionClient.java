@@ -2,6 +2,9 @@ package com.airesapps.client;
 
 import android.os.Build;
 
+import com.airesapps.dto.PredictionDTO;
+import com.google.gson.Gson;
+
 import java.io.File;
 import java.io.IOException;
 import okhttp3.*;
@@ -10,16 +13,15 @@ import java.util.Base64;
 public class PathologyPredictionClient {
 
     private String response;
+    private static final String PROD_URL = "https://flask-production-a030.up.railway.app/predict";
+    private static final String LOCAL_URL = "http://10.0.2.2:5000/predict";
 
     public static String predict(File audioFile1, File audioFile2, File audioFile3) {
 
-        String url = "http://10.0.2.2:5000/predict"; // altere para o endereço correto da sua API
+        String url = PROD_URL;
         MediaType mediaType = MediaType.parse("application/octet-stream");
         OkHttpClient client = new OkHttpClient();
 
-        String audio1Base64 = fileToBase64(audioFile1);
-        String audio2Base64 = fileToBase64(audioFile2);
-        String audio3Base64 = fileToBase64(audioFile3);
         // cria o objeto de requisição HTTP POST
         // Constrói o corpo da requisição com os arquivos de áudio codificados em Base64
         RequestBody requestBody = new MultipartBody.Builder()
@@ -38,6 +40,9 @@ public class PathologyPredictionClient {
             // Envia a requisição e obtém a resposta
             Response response = client.newCall(request).execute();
             String responseBody = response.body().string();
+            Gson gson = new Gson();
+            PredictionDTO predictionDTO = gson.fromJson(responseBody, PredictionDTO.class);
+
             return responseBody;
 
         } catch (IOException e) {
