@@ -10,7 +10,6 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.text.format.DateFormat;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -72,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mTextView = findViewById(R.id.text_view);
-        mStartStopImageView = findViewById(R.id.image_view);
+        mStartStopImageView = findViewById(R.id.microphone_view);
         mRecordingTextView = findViewById(R.id.recording_text_view);
         mAudioWave = findViewById(R.id.audiowave);
         mProgressBar = findViewById(R.id.progressBar);
