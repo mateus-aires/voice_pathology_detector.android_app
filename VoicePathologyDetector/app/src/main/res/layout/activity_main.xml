@@ -4,21 +4,37 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/tela_inicial_2"
+    android:background="@drawable/background_init"
     tools:context="MainActivity">
+
+    <TextView
+        android:id="@+id/observations"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="200dp"
+        android:layout_marginRight="80dp"
+        android:layout_centerInParent="true"
+        android:fontFamily="sans-serif-light"
+        android:maxWidth="55dp"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:visibility="invisible"
+        />
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="600dp">
 
         <ImageView
+            android:id="@+id/baloon"
             android:layout_width="280dp"
             android:layout_height="280dp"
             android:layout_centerInParent="true"
-            android:src="@drawable/baloon_ic" />
+            android:src="@drawable/baloon_ic"
+            android:visibility="invisible" />
 
         <TextView
-            android:id="@+id/text_view"
+            android:id="@+id/instruction"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
@@ -27,7 +43,58 @@
             android:maxWidth="55dp"
             android:text="@string/step_1"
             android:textColor="@color/white"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            android:visibility="invisible"
+            />
+
+        <TextView
+            android:id="@+id/listening"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center_horizontal"
+            android:maxWidth="55dp"
+            android:text="@string/listening"
+            android:textColor="@color/white"
+            android:textSize="25sp"
+            android:visibility="invisible"
+            />
+
+        <TextView
+            android:id="@+id/listening_step"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:fontFamily="sans-serif-light"
+            android:gravity="center_horizontal"
+            android:maxWidth="55dp"
+            android:text="@string/step_1_listening"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:layout_below="@id/listening"
+            android:visibility="invisible"
+            />
+        <ImageView
+            android:id="@+id/audiowave"
+            android:layout_width="wrap_content"
+            android:layout_height="150dp"
+            android:layout_below="@id/listening_step"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/audio_wave_ic"
+            android:visibility="invisible"
+            />
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            style="@android:style/Widget.Holo.ProgressBar.Large"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/design_default_color_background"
+            android:layout_above="@id/audiowave"
+            android:layout_marginBottom="16dp"
+            android:visibility="invisible"
+            />
 
     </RelativeLayout>
 
@@ -38,7 +105,9 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:padding="16dp"
-        android:src="@drawable/restart3_ic"/>
+        android:src="@drawable/restart3_ic"
+        android:visibility="invisible"
+        />
 
     <ImageView
         android:id="@+id/help_view"
@@ -47,7 +116,20 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
         android:padding="16dp"
-        android:src="@drawable/help_ic"/>
+        android:src="@drawable/help_ic"
+        android:visibility="invisible"
+        />
+
+    <ImageView
+        android:id="@+id/close_help"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:padding="16dp"
+        android:src="@drawable/close_ic"
+        android:visibility="invisible"
+        />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -61,7 +143,8 @@
 
             android:layout_centerInParent="true"
             android:clickable="true"
-            android:src="@drawable/record_ic" />
+            android:src="@drawable/record_ic"
+            android:visibility="invisible" />
 
         <ImageView
             android:id="@+id/stop_view"
@@ -70,7 +153,27 @@
             android:layout_centerInParent="true"
             android:clickable="true"
             android:src="@drawable/stop_ic"
-            android:visibility="invisible"/>
+            android:visibility="invisible" />
+
+        <ImageView
+            android:id="@+id/init"
+            android:layout_width="200dp"
+            android:layout_height="125dp"
+            android:layout_centerInParent="true"
+            android:clickable="true"
+            android:src="@drawable/start_ic"
+            />
+
+        <TextView
+            android:id="@+id/init_text"
+            android:layout_width="200dp"
+            android:layout_height="125dp"
+            android:layout_centerInParent="true"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center"
+            android:text="@string/init"
+            android:textColor="@color/white"
+            android:textSize="22sp" />
 
         <Chronometer
             android:id="@+id/chronometer"
@@ -81,35 +184,66 @@
             android:textSize="24sp"
             android:textColor="@color/white"
             android:fontFamily="sans-serif-medium"
-            android:visibility="visible"
+            android:visibility="invisible"
             />
 
-<!--        <TextView-->
-<!--            android:id="@+id/recording_text_view"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_centerHorizontal="true"-->
-<!--            android:text="@string/recording"-->
-<!--            android:textSize="15sp"-->
-<!--            android:textStyle="italic"-->
-<!--            android:fontFamily="sans-serif"-->
-<!--            android:visibility="invisible" />-->
+        <TextView
+            android:id="@+id/processing"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="75dp"
+            android:fontFamily="sans-serif"
+            android:gravity="center_horizontal"
+            android:maxWidth="55dp"
+            android:text="@string/processing"
+            android:textColor="@color/white"
+            android:visibility="invisible"
+            android:textSize="25sp" />
 
-<!--        <ImageView-->
-<!--            android:id="@+id/audiowave"-->
-<!--            android:layout_width="40dp"-->
-<!--            android:layout_height="40dp"-->
-<!--            android:layout_below="@id/recording_text_view"-->
-<!--            android:layout_centerHorizontal="true"-->
-<!--            android:src="@drawable/audio_wave_ic"-->
-<!--            android:visibility="invisible" />-->
+        <TextView
+            android:id="@+id/result"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="75dp"
+            android:fontFamily="sans-serif"
+            android:gravity="center_horizontal"
+            android:maxWidth="55dp"
+            android:textColor="@color/white"
+            android:textSize="23sp"
+            android:visibility="invisible"
+            />
+
+        <TextView
+            android:id="@+id/result_proba"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/result"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="10dp"
+            android:fontFamily="sans-serif-light"
+            android:gravity="center_horizontal"
+            android:maxWidth="55dp"
+            android:text="Probabilidade: 93%"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:visibility="invisible" />
+        <TextView
+            android:id="@+id/error_message"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerInParent="true"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center_horizontal"
+            android:maxWidth="55dp"
+            android:textColor="@color/white"
+            android:textSize="23sp"
+            android:visibility="invisible"/>
 
     </RelativeLayout>
-
-
-
-
-
-
 
 </RelativeLayout>

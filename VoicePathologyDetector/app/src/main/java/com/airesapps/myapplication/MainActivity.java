@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.RECORD_AUDIO
     };
 
-    private TextView mTextView;
+    private TextView mInstructionTextView;
     private ImageView mStartStopImageView;
     private ImageView mAudioWave;
     private TextView mRecordingTextView;
@@ -65,33 +65,36 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean mIsRecording = false;
 
+    private TextView mObservations;
+    private TextView mListening;
+    private TextView mListeningStep;
+    private ImageView mBaloonView;
+    private TextView mProcessing;
+    private ImageView mBaloonView;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mTextView = findViewById(R.id.text_view);
-        mStartStopImageView = findViewById(R.id.microphone_view);
-        mRecordingTextView = findViewById(R.id.recording_text_view);
+        mObservations = findViewById(R.id.observations);
+        mBaloonView = findViewById(R.id.baloon);
+        mInstructionTextView = findViewById(R.id.instruction);
+        mListening = findViewById(R.id.listening);
+        mListeningStep = findViewById(R.id.listening_step);
         mAudioWave = findViewById(R.id.audiowave);
-        mProgressBar = findViewById(R.id.progressBar);
+        mProgressBar = findViewById(R.id.progress_bar);
         mChronometer = findViewById(R.id.chronometer);
-        mProgressBar.setVisibility(View.INVISIBLE);
+        mProcessing = findViewById(R.id.processing);
 
-        lvInstructions = new ListView(this);
-        InstructionsAdapter adapter = new InstructionsAdapter(this, InstructionsUtil.getInstructionsList());
-        lvInstructions.setAdapter(adapter);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                .setTitle("Instruções")
-                .setView(lvInstructions);
-
-        final AlertDialog dialog = builder.create();
-
+        mStartStopImageView = findViewById(R.id.microphone_view);
         mHelp = findViewById(R.id.help_view);
-        mHelp.setOnClickListener(v -> dialog.show());
-
         mRestart = findViewById(R.id.restart_view);
+
+
+//        mHelp.setOnClickListener(v -> dialog.show());
+
         mRestart.setOnClickListener(v -> {
             Intent intent = getIntent();
             finish();
@@ -196,16 +199,16 @@ public class MainActivity extends AppCompatActivity {
     private void updateUI() {
         switch (mStep) {
             case 1:
-                mTextView.setText(R.string.step_1);
+                mInstructionTextView.setText(R.string.step_1);
                 break;
             case 2:
-                mTextView.setText(R.string.step_2);
+                mInstructionTextView.setText(R.string.step_2);
                 break;
             case 3:
-                mTextView.setText(R.string.step_3);
+                mInstructionTextView.setText(R.string.step_3);
                 break;
             case 4:
-                mTextView.setText(R.string.processing);
+                mInstructionTextView.setText(R.string.processing);
                 break;
         }
     }
@@ -247,7 +250,7 @@ public class MainActivity extends AppCompatActivity {
         mStartStopImageView.setClickable(false);
         String presentResult = getPredictionString();
         Toast.makeText(this, presentResult, Toast.LENGTH_SHORT).show();
-        mTextView.setText(presentResult);
+        mInstructionTextView.setText(presentResult);
 
     }
 
@@ -260,8 +263,8 @@ public class MainActivity extends AppCompatActivity {
         else if (predictionDTO != null) {
             errorMessage = predictionDTO.getErrorCause();
         }
-        mStartStopImageView.setImageResource(R.drawable.error_icon);
-        mTextView.setText(errorMessage);
+        mStartStopImageView.setImageResource(R.drawable.error_ic);
+        mInstructionTextView.setText(errorMessage);
         mStartStopImageView.setClickable(false);
         Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
     }
