@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="MainActivity">
+
+    <ImageView
+        android:id="@+id/restart_view"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:padding="16dp"
+        android:src="@drawable/restart2_ic"/>
+
+    <ImageView
+        android:id="@+id/help_view"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:padding="16dp"
+        android:src="@drawable/help_ic"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="450dp">
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center"
+            />
+
+        <Chronometer
+            android:id="@+id/chronometer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:textSize="24sp"
+            android:visibility="invisible"/>
+
+    </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/image_view"
+        android:layout_width="150dp"
+        android:layout_height="200dp"
+        android:layout_centerInParent="true"
+        android:clickable="true"
+        android:src="@drawable/record_ic" />
+
+    <TextView
+        android:id="@+id/text_view"
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/image_view"
+        android:gravity="center_horizontal"
+        android:text="@string/step_1"
+        android:textSize="25sp"
+        android:fontFamily="sans-serif-medium"
+        android:maxWidth="60dp"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        android:id="@+id/recording_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/text_view"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:text="@string/recording"
+        android:textSize="15sp"
+        android:textStyle="italic"
+        android:fontFamily="sans-serif"
+        android:visibility="invisible"
+
+        />
+
+    <ImageView
+        android:id="@+id/audiowave"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_below="@id/recording_text_view"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/audio_wave_ic"
+        android:visibility="invisible"
+        />
+
+</RelativeLayout>
