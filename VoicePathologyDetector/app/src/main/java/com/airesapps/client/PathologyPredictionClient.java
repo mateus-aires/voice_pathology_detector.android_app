@@ -5,6 +5,7 @@ import static com.airesapps.util.Constants.CONNECTION_ERROR_MESSAGE;
 import android.os.Build;
 
 import com.airesapps.dto.PredictionDTO;
+import com.airesapps.util.Constants;
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -14,19 +15,18 @@ import java.io.*;
 import java.util.Base64;
 public class PathologyPredictionClient {
 
-    private static final String PROD_URL = "https://flask-production-a030.up.railway.app/predict";
-    private static final String LOCAL_URL = "http://10.0.2.2:5000/predict";
+
 
     public static PredictionDTO predict(File audioFile1, File audioFile2, File audioFile3) {
 
-        String url = PROD_URL;
+        String url = Constants.PROD_URL;
         OkHttpClient client = new OkHttpClient();
 
         RequestBody requestBody = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
-                .addFormDataPart("audio1", audioFile1.getName(), RequestBody.create(MediaType.parse("audio/*m4a"), audioFile1))
-                .addFormDataPart("audio2", audioFile2.getName(), RequestBody.create(MediaType.parse("audio/*m4a"), audioFile2))
-                .addFormDataPart("audio3", audioFile3.getName(), RequestBody.create(MediaType.parse("audio/*m4a"), audioFile3))
+                .addFormDataPart("audio1", audioFile1.getName(), RequestBody.create(audioFile1, MediaType.parse("audio/*m4a")))
+                .addFormDataPart("audio2", audioFile2.getName(), RequestBody.create(audioFile2, MediaType.parse("audio/*m4a")))
+                .addFormDataPart("audio3", audioFile3.getName(), RequestBody.create(audioFile3, MediaType.parse("audio/*m4a")))
                 .build();
 
         Request request = new Request.Builder()
