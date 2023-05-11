@@ -2,6 +2,7 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/parent_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background_init"
@@ -212,6 +213,7 @@
             android:fontFamily="sans-serif"
             android:gravity="center_horizontal"
             android:maxWidth="55dp"
+            android:text="vc tá doente man"
             android:textColor="@color/white"
             android:textSize="23sp"
             android:visibility="invisible"
