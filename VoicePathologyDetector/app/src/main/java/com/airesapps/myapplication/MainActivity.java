@@ -198,7 +198,6 @@ public class MainActivity extends AppCompatActivity {
                 if (predictionDTO.getResult()) {
                     tResultProbability.setVisibility(View.VISIBLE);
                 }
-                
                 break;
 
             case Constants.STATE_RESULT_ERROR:
