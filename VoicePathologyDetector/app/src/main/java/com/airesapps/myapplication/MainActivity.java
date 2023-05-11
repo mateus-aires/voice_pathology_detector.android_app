@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
             mPermissionToRecordAccepted = true;
         }
 
-// Configura o botão de gravar/parar
+        // Configura o botão de gravar/parar
         mStartStopImageView.setOnClickListener(v -> {
             if (!mIsRecording) {
                 // Começa a gravar
@@ -188,19 +188,22 @@ public class MainActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.VISIBLE);
                 tProcessing.setVisibility(View.VISIBLE);
                 mHelp.setClickable(false);
+                mRestart.setClickable(false);
                 break;
 
             case Constants.STATE_RESULT_SUCCESS:
                 mRelativeLayoutParent.setBackgroundResource(R.drawable.backgroung_result);
                 tResult.setVisibility(View.VISIBLE);
-                tResultProbability.setVisibility(View.VISIBLE);
-                mHelp.setClickable(true);
+
+                if (predictionDTO.getResult()) {
+                    tResultProbability.setVisibility(View.VISIBLE);
+                }
+                
                 break;
 
             case Constants.STATE_RESULT_ERROR:
                 mRelativeLayoutParent.setBackgroundResource(R.drawable.backgroung_error);
                 tErrorMessage.setVisibility(View.VISIBLE);
-                mHelp.setClickable(true);
                 break;
         }
     }
@@ -373,7 +376,6 @@ public class MainActivity extends AppCompatActivity {
         mBalloonView.setVisibility(View.INVISIBLE);
         tInstruction.setVisibility(View.INVISIBLE);
         mStartStopImageView.setVisibility(View.INVISIBLE);
-        mStartStopImageView.setImageResource(R.drawable.record_ic);
 
         tListening.setVisibility(View.INVISIBLE);
         tListeningStep.setVisibility(View.INVISIBLE);
@@ -387,6 +389,10 @@ public class MainActivity extends AppCompatActivity {
         tResultProbability.setVisibility(View.INVISIBLE);
 
         tErrorMessage.setVisibility(View.INVISIBLE);
+
+        mHelp.setClickable(true);
+        mRestart.setClickable(true);
+        mStartStopImageView.setImageResource(R.drawable.record_ic);
 
     }
 
