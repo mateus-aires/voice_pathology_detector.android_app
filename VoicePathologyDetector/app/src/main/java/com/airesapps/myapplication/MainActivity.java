@@ -113,15 +113,13 @@ public class MainActivity extends AppCompatActivity {
             mPermissionToRecordAccepted = true;
         }
 
-        // Configura o botão de gravar/parar
+// Configura o botão de gravar/parar
         mStartStopImageView.setOnClickListener(v -> {
             if (!mIsRecording) {
                 // Começa a gravar
                 setState(Constants.STATE_RECORDING);
                 startRecording();
-                chronometer.setBase(SystemClock.elapsedRealtime());
-                chronometer.setFormat(Constants.CHRONOMETER_FORMAT);
-                chronometer.start();
+
                 chronometer.setOnChronometerTickListener(chronometer -> {
                     long elapsedMillis = SystemClock.elapsedRealtime() - chronometer.getBase();
                     if (elapsedMillis >= 8000) {
@@ -179,6 +177,10 @@ public class MainActivity extends AppCompatActivity {
                 mStartStopImageView.setImageResource(R.drawable.stop_ic);
                 mStartStopImageView.setVisibility(View.VISIBLE);
                 chronometer.setVisibility(View.VISIBLE);
+                chronometer.setBase(SystemClock.elapsedRealtime());
+                chronometer.setText("00:00");
+                chronometer.start();
+                chronometer.setFormat(Constants.CHRONOMETER_FORMAT);
                 break;
 
             case Constants.STATE_PROCESSING:
