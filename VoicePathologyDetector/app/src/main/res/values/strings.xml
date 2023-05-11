@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Voice Pathology Detector</string>
+    <string name="listening">Ouvindo...</string>
+    <string name="step_1">Fale a vogal \'a\' por mais de três segundos</string>
+    <string name="step_1_listening">Vogal \'a\'</string>
+    <string name="step_2">Fale a vogal \'i\' por mais de três segundos</string>
+    <string name="step_2_listening">Vogal \'i\'</string>
+    <string name="step_3">Fale a vogal \'u\' por mais de três segundos</string>
+    <string name="step_3_listening">Vogal \'u\'</string>
+    <string name="processing">Processando...</string>
+    <string name="init">Iniciar</string>
+    <string name="stop">stop</string>
+</resources>
