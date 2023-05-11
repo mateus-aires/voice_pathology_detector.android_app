@@ -20,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -35,56 +36,50 @@ import com.airesapps.util.Constants;
 
 public class MainActivity extends AppCompatActivity {
 
+    // Constants
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
-    private static String[] PERMISSIONS = {
-            Manifest.permission.RECORD_AUDIO
-    };
-
-    private TextView tInstruction;
-    private ImageView mStartStopImageView;
-    private ImageView mAudioWave;
-    private TextView mRecordingTextView;
-    private ImageView mRestart;
-
-    private ProgressBar progressBar;
-    private Chronometer chronometer;
-
-    private PredictionDTO predictionDTO;
-
-
-    private boolean mPermissionToRecordAccepted = false;
-    private String mOutputFilePath;
-    private String[] audioPaths;
-    private MediaRecorder mRecorder;
-
-    private ListView lvInstructions;
-    private ImageView mHelp;
-
-    private int mStep = 1;
-
-    private boolean mIsRecording = false;
-
-    private TextView tObservations;
-    private TextView tListening;
-    private TextView tInitText;
-    private TextView tListeningStep;
-    private ImageView mBaloonView;
-    private TextView tProcessing;
-    private TextView tResult;
-    private TextView tErrorMessage;
-    private TextView tResultProba;
-
-    private ImageView mInit;
-    private ImageView mMicrophoneView;
-    private RelativeLayout mRelativeLayoutParent;
     private static final int STATE_LOGO = -1;
     private static final int STATE_INSTRUCTION = 0;
     private static final int STATE_RECORDING = 1;
     private static final int STATE_PROCESSING = 2;
     private static final int STATE_RESULT_SUCCESS = 3;
     private static final int STATE_RESULT_ERROR = 4;
+    private static String[] PERMISSIONS = {Manifest.permission.RECORD_AUDIO};
 
+    // Views
+    private TextView tInstruction;
+    private TextView mRecordingTextView;
+    private TextView tObservations;
+    private TextView tListening;
+    private TextView tInitText;
+    private TextView tListeningStep;
+    private TextView tProcessing;
+    private TextView tResult;
+    private TextView tErrorMessage;
+    private TextView tResultProba;
+    private ImageView mStartStopImageView;
+    private ImageView mAudioWave;
+    private ImageView mRestart;
+    private ImageView mHelp;
+    private ImageView mBaloonView;
+    private ImageView mInit;
+    private ImageView mMicrophoneView;
+    private ImageView close;
+    private ProgressBar progressBar;
+    private ListView lvInstructions;
+    private RelativeLayout mRelativeLayoutParent;
+    private View helpDialogBox;
+    private Chronometer chronometer;
+
+    // Other variables
+    private PredictionDTO predictionDTO;
+    private boolean mPermissionToRecordAccepted = false;
+    private boolean mIsRecording = false;
+    private int mStep = 1;
     private int mState = STATE_LOGO;
+    private String mOutputFilePath;
+    private String[] audioPaths;
+    private MediaRecorder mRecorder;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -117,8 +112,16 @@ public class MainActivity extends AppCompatActivity {
             setState(STATE_INSTRUCTION);
         });
 
+        helpDialogBox = getLayoutInflater().inflate(R.layout.instructions, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(helpDialogBox);
+        AlertDialog dialog = builder.create();
+
+        close = helpDialogBox.findViewById(R.id.close);
+        close.setOnClickListener(v -> dialog.dismiss());
 
 
+        mHelp.setOnClickListener(v -> dialog.show());
 
 //        mHelp.setOnClickListener(v -> dialog.show());
 
@@ -195,7 +198,6 @@ public class MainActivity extends AppCompatActivity {
             case STATE_INSTRUCTION:
 
 
-
                 mBaloonView.setVisibility(View.VISIBLE);
                 tInstruction.setVisibility(View.VISIBLE);
                 mStartStopImageView.setVisibility(View.VISIBLE);
@@ -203,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
 
-                // startRecording
+            // startRecording
             case STATE_RECORDING:
                 tListening.setVisibility(View.VISIBLE);
                 tListeningStep.setVisibility(View.VISIBLE);
@@ -214,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
 
 
                 break;
-                // startChronometer
+            // startChronometer
 
             case STATE_PROCESSING:
                 mRelativeLayoutParent.setBackgroundResource(R.drawable.backgroung_wave);
@@ -222,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
                 tProcessing.setVisibility(View.VISIBLE);
                 mHelp.setClickable(false);
                 break;
-                // startChronometer
+            // startChronometer
             case STATE_RESULT_SUCCESS:
                 mRelativeLayoutParent.setBackgroundResource(R.drawable.backgroung_result);
                 tResult.setVisibility(View.VISIBLE);
@@ -238,7 +240,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void setInvisible(){
+    private void setInvisible() {
 //        mHelp.setVisibility(View.INVISIBLE);
 //        mRestart.setVisibility(View.INVISIBLE);
 //        mRecordingTextView.setVisibility(View.INVISIBLE);
@@ -341,8 +343,8 @@ public class MainActivity extends AppCompatActivity {
             try {
                 predictionDTO =
                         PathologyPredictionClient.predict(new File(audioPaths[0]),
-                                                          new File(audioPaths[1]),
-                                                          new File(audioPaths[2]));
+                                new File(audioPaths[1]),
+                                new File(audioPaths[2]));
                 handler.post(() -> {
 //                    progressBar.setVisibility(View.GONE);
                     handleResponse();
@@ -377,9 +379,7 @@ public class MainActivity extends AppCompatActivity {
         String errorMessage = Constants.INTERNAL_ERROR_MESSAGE;
         if (!mPermissionToRecordAccepted) {
             errorMessage = Constants.PERMISSION_DENIED_MESSAGE;
-        }
-
-        else if (predictionDTO != null) {
+        } else if (predictionDTO != null) {
             errorMessage = predictionDTO.getErrorCause();
         }
 //        mStartStopImageView.setImageResource(R.drawable.error_ic);
@@ -391,7 +391,7 @@ public class MainActivity extends AppCompatActivity {
     private String setPredictionString() {
         int predictionProbability = (int) Math.round(predictionDTO.getProbability() * 100);
         String presentResult = Constants.FALSE_PREDICTION_MESSAGE;
-        String presentResultProba = String.format(Constants.PRESENT_PROBA_FORMAT, predictionProbability);
+        String presentResultProba = String.format(Constants.PRESENT_PROBA_FORMAT, predictionProbability) + "%";
 
         if (predictionDTO.getResult()) {
             presentResult = Constants.TRUE_PREDICTION_MESSAGE;

@@ -1,0 +1,8 @@
+- Certifique-se que está em um ambiente silencioso. O detector é sensível a ruídos.
+- Certifique-se que está conectado à internet.";
+- Quando a instrução surgir, fale de forma sustentada as vogais "a", "i" e "u" por mais de três segundos.
+- Após as três vogais, o resultado será mostrado na tela, junto com a probabilidade de você estar doente. Probabilidades acima de 50% implicam em um diagnóstico positivo.
+- O detector necessita de, no mínimo, três segundos de som audível (sem silêncio) para detectar patologias.
+- Lembre-se: esta não é uma ferramenta de pré-diagnóstico, somente um profissional da área de saúde pode diagnosticar disfonias. O propósito dessa aplicação é incentivar usuários a buscar assistência médica.
+
+Criado por Mateus Aires (github.com/mateus-aires)
