@@ -1,7 +1,11 @@
 package com.airesapps.util;
 
+import android.Manifest;
+
 public class Constants {
+
     // MainActivity constants
+    public static String[] PERMISSIONS = {Manifest.permission.RECORD_AUDIO};
     public static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     public static final int STATE_LOGO = -1;
     public static final int STATE_INSTRUCTION = 0;
@@ -10,6 +14,7 @@ public class Constants {
     public static final int STATE_RESULT_SUCCESS = 3;
     public static final int STATE_RESULT_ERROR = 4;
     public static final String CHRONOMETER_FORMAT = "mm:ss";
+    public static final String CHRONOMETER_INIT_TEXT = "00:00";
 
     // PathologyPredictionClient constants
     public static final String PROD_URL = "https://flask-production-a030.up.railway.app/predict";

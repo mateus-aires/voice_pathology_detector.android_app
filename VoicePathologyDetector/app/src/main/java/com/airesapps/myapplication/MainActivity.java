@@ -36,7 +36,7 @@ import com.airesapps.util.ObservationsUtil;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static String[] PERMISSIONS = {Manifest.permission.RECORD_AUDIO};
+
     // Views
     private TextView tInstruction;
     private TextView tListening;
@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
         // Checks if permission to record audio has been granted
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, PERMISSIONS, Constants.REQUEST_RECORD_AUDIO_PERMISSION);
+            ActivityCompat.requestPermissions(this, Constants.PERMISSIONS, Constants.REQUEST_RECORD_AUDIO_PERMISSION);
         } else {
             mPermissionToRecordAccepted = true;
         }
@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
                 mStartStopImageView.setVisibility(View.VISIBLE);
                 chronometer.setVisibility(View.VISIBLE);
                 chronometer.setBase(SystemClock.elapsedRealtime());
-                chronometer.setText("00:00");
+                chronometer.setText(Constants.CHRONOMETER_INIT_TEXT);
                 chronometer.start();
                 chronometer.setFormat(Constants.CHRONOMETER_FORMAT);
                 break;
