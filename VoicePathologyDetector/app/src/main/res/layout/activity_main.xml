@@ -8,20 +8,6 @@
     android:background="@drawable/background_init"
     tools:context="MainActivity">
 
-    <TextView
-        android:id="@+id/observations"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="200dp"
-        android:layout_marginRight="80dp"
-        android:layout_centerInParent="true"
-        android:fontFamily="sans-serif-light"
-        android:maxWidth="55dp"
-        android:textColor="@color/white"
-        android:textSize="20sp"
-        android:visibility="invisible"
-        />
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="600dp">
