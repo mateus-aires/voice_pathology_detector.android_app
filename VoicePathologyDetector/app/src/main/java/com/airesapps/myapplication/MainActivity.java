@@ -32,14 +32,13 @@ import java.util.concurrent.Executors;
 import com.airesapps.client.PathologyPredictionClient;
 import com.airesapps.dto.PredictionDTO;
 import com.airesapps.util.Constants;
+import com.airesapps.util.ObservationsUtil;
 
 public class MainActivity extends AppCompatActivity {
 
     private static String[] PERMISSIONS = {Manifest.permission.RECORD_AUDIO};
-
     // Views
     private TextView tInstruction;
-    private TextView tObservations;
     private TextView tListening;
     private TextView tInitText;
     private TextView tListeningStep;
@@ -47,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView tResult;
     private TextView tErrorMessage;
     private TextView tResultProbability;
+    private TextView tDialogObservations;
     private ImageView mStartStopImageView;
     private ImageView mAudioWave;
     private ImageView mRestart;
@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean mPermissionToRecordAccepted = false;
     private boolean mIsRecording = false;
     private int mStep = 1;
-    private int mState = Constants.STATE_LOGO;
+    private int currentState = Constants.STATE_LOGO;
     private String mOutputFilePath;
     private String[] audioPaths;
     private MediaRecorder mRecorder;
@@ -75,16 +75,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Inicializa as views
+        // Initialize views
         initViews();
 
-        // Configura o botão Iniciar
+        // Configure init button
         mInit.setOnClickListener(v -> {
             setState(Constants.STATE_INSTRUCTION);
         });
 
-        // Configura o diálogo de ajuda
+        // Configure help dialog box
         helpDialogBox = getLayoutInflater().inflate(R.layout.instructions, null);
+        tDialogObservations = helpDialogBox.findViewById(R.id.dialog_text);
+        tDialogObservations.setText(ObservationsUtil.getObservations());
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(helpDialogBox);
         AlertDialog dialog = builder.create();
@@ -94,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
 
         mHelp.setOnClickListener(v -> dialog.show());
 
-        // Configura o botão Reiniciar
+        // Configure the reset button
         mRestart.setOnClickListener(v -> {
             setState(Constants.STATE_INSTRUCTION);
             Intent intent = getIntent();
@@ -102,10 +104,10 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        // Inicializa os caminhos de áudio
+        // Initialize audio paths
         this.audioPaths = new String[3];
 
-        // Verifica se a permissão para gravar áudio foi concedida
+        // Checks if permission to record audio has been granted
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, PERMISSIONS, Constants.REQUEST_RECORD_AUDIO_PERMISSION);
@@ -113,17 +115,17 @@ public class MainActivity extends AppCompatActivity {
             mPermissionToRecordAccepted = true;
         }
 
-        // Configura o botão de gravar/parar
+        // Configure the record/stop button
         mStartStopImageView.setOnClickListener(v -> {
             if (!mIsRecording) {
-                // Começa a gravar
+                // Start recording
                 setState(Constants.STATE_RECORDING);
                 startRecording();
 
                 chronometer.setOnChronometerTickListener(chronometer -> {
                     long elapsedMillis = SystemClock.elapsedRealtime() - chronometer.getBase();
                     if (elapsedMillis >= 8000) {
-                        // Para a gravação
+                        // Stop recording
                         stopRecording();
 
                         if (mStep <= 3) {
@@ -137,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
             } else {
-                // Para a gravação
+                // Stop recording
                 stopRecording();
 
                 if (mStep <= 3) {
@@ -151,18 +153,18 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void setState(int state) {
-        if (mState == Constants.STATE_LOGO) {
+        if (currentState == Constants.STATE_LOGO) {
             mHelp.setVisibility(View.VISIBLE);
             mRestart.setVisibility(View.VISIBLE);
         }
 
-        // Atualiza estado atual
-        mState = state;
+        // Update current state
+        currentState = state;
 
-        // Esconde todas as views
+        // Hide views
         setViewsInvisibility();
 
-        // Torna visíveis views específicas para cada estado
+        // Makes specific views visible for each state
         switch (state) {
             case Constants.STATE_INSTRUCTION:
                 mBalloonView.setVisibility(View.VISIBLE);
@@ -208,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startRecording() {
-        // Define o caminho do arquivo de saída para a gravação de áudio
+        // Sets the output file path for audio recording
         mOutputFilePath = getExternalCacheDir().getAbsolutePath() + "/audio" + mStep + ".mp4";
         mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
@@ -224,29 +226,29 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        // Inicia a gravação e atualiza a interface do usuário
+        // Starts recording and updates the UI
         mRecorder.start();
         mIsRecording = true;
         chronometer.start();
     }
 
     private void stopRecording() {
-        // Para a gravação e libera os recursos do MediaRecorder
+        // Stops recording and releases MediaRecorder resources
         mRecorder.stop();
         mRecorder.reset();
         mRecorder.release();
         mRecorder = null;
         chronometer.stop();
 
-        // Salva o caminho do arquivo de áudio gravado e atualiza a etapa atual
+        // Saves the recorded audio file path and updates the current step
         audioPaths[mStep - 1] = mOutputFilePath;
         mStep++;
 
-        // Atualiza a interface do usuário
+        // Updates the UI
         mIsRecording = false;
         updateUI();
 
-        // Se todas as etapas foram concluídas, realiza a predição
+        // If all steps have been completed, perform the prediction
         if (mStep > 3) {
             performPrediction();
         }
@@ -271,15 +273,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void performPrediction() {
-        // Define o estado da interface do usuário como "processando"
+        //Sets the UI state to "processing"
         setState(Constants.STATE_PROCESSING);
 
-        // Cria uma nova thread para realizar a predição
+        // Creates a new thread to perform the prediction
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
         executor.execute(() -> {
             try {
-                // Realiza a predição com os arquivos de áudio gravados
+                // Perform prediction with recorded audio files
                 predictionDTO = PathologyPredictionClient.predict(
                         new File(audioPaths[0]),
                         new File(audioPaths[1]),
@@ -287,12 +289,10 @@ public class MainActivity extends AppCompatActivity {
                 );
 
                 handler.post(() -> {
-                    // Se a predição foi bem sucedida, exibe o resultado
                     handleResponse();
                 });
             } catch (Exception e) {
                 handler.post(() -> {
-                    // Se ocorreu um erro na predição, exibe a mensagem de erro
                     handleResponse();
                 });
             }
@@ -300,7 +300,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleResponse() {
-        // Verifica se a predição foi bem sucedida e exibe o resultado ou a mensagem de erro
+        //Checks whether the prediction was successful and displays the result or error message
         if (predictionDTO.isSuccessful()) {
             displayResult();
         } else {
@@ -346,7 +346,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void initViews() {
         mRelativeLayoutParent = findViewById(R.id.parent_view);
-        tObservations = findViewById(R.id.observations);
         mBalloonView = findViewById(R.id.baloon);
         tInstruction = findViewById(R.id.instruction);
         tListening = findViewById(R.id.listening);
@@ -363,6 +362,7 @@ public class MainActivity extends AppCompatActivity {
         mInit = findViewById(R.id.init);
         tInitText = findViewById(R.id.init_text);
         tErrorMessage = findViewById(R.id.error_message);
+
     }
 
     private void setViewsInvisibility() {
@@ -370,8 +370,6 @@ public class MainActivity extends AppCompatActivity {
         mRelativeLayoutParent.setBackgroundResource(R.drawable.backgroung_dark);
         mInit.setVisibility(View.INVISIBLE);
         tInitText.setVisibility(View.INVISIBLE);
-        tObservations.setVisibility(View.INVISIBLE);
-
         mBalloonView.setVisibility(View.INVISIBLE);
         tInstruction.setVisibility(View.INVISIBLE);
         mStartStopImageView.setVisibility(View.INVISIBLE);
