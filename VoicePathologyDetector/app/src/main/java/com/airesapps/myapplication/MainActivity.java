@@ -26,6 +26,7 @@ import androidx.core.content.ContextCompat;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -79,29 +80,24 @@ public class MainActivity extends AppCompatActivity {
         initViews();
 
         // Configure init button
-        mInit.setOnClickListener(v -> {
-            setState(Constants.STATE_INSTRUCTION);
-        });
-
-        // Configure help dialog box
-        helpDialogBox = getLayoutInflater().inflate(R.layout.instructions, null);
-        tDialogObservations = helpDialogBox.findViewById(R.id.dialog_text);
-        tDialogObservations.setText(ObservationsUtil.getObservations());
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setView(helpDialogBox);
-        AlertDialog dialog = builder.create();
+        AlertDialog dialog = getHelpAlertDialog();
 
         close = helpDialogBox.findViewById(R.id.close);
         close.setOnClickListener(v -> dialog.dismiss());
 
         mHelp.setOnClickListener(v -> dialog.show());
 
+        mInit.setOnClickListener(v -> {
+            setState(Constants.STATE_INSTRUCTION);
+            dialog.show();
+        });
+
         // Configure the reset button
         mRestart.setOnClickListener(v -> {
-            setState(Constants.STATE_INSTRUCTION);
             Intent intent = getIntent();
             finish();
             startActivity(intent);
+            setState(Constants.STATE_INSTRUCTION);
         });
 
         // Initialize audio paths
@@ -149,6 +145,18 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @NonNull
+    private AlertDialog getHelpAlertDialog() {
+        // Configure help dialog box
+        helpDialogBox = getLayoutInflater().inflate(R.layout.instructions, null);
+        tDialogObservations = helpDialogBox.findViewById(R.id.dialog_text);
+        tDialogObservations.setText(ObservationsUtil.getObservations());
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(helpDialogBox);
+        AlertDialog dialog = builder.create();
+        return dialog;
     }
 
 
@@ -211,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void startRecording() {
         // Sets the output file path for audio recording
-        mOutputFilePath = getExternalCacheDir().getAbsolutePath() + "/audio" + mStep + ".mp4";
+        mOutputFilePath = getExternalCacheDir().getAbsolutePath() + String.format(Locale.getDefault(), Constants.AUDIO_NAME_FORMAT, mStep);
         mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
@@ -255,7 +263,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateUI() {
-        // Atualiza o texto das instruções e a mensagem de "ouvindo"
+        // Update current instruction text and "listening" message
         switch (mStep) {
             case 1:
                 tInstruction.setText(R.string.step_1);
@@ -273,7 +281,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void performPrediction() {
-        //Sets the UI state to "processing"
+        // Sets the UI state to "processing"
         setState(Constants.STATE_PROCESSING);
 
         // Creates a new thread to perform the prediction
@@ -300,7 +308,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleResponse() {
-        //Checks whether the prediction was successful and displays the result or error message
+        // Checks whether the prediction was successful and displays the result or error message
         if (predictionDTO.isSuccessful()) {
             displayResult();
         } else {
