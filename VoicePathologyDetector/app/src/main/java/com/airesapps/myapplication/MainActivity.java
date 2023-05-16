@@ -241,11 +241,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void stopRecording() {
-        // Stops recording and releases MediaRecorder resources
-        mRecorder.stop();
-        mRecorder.reset();
-        mRecorder.release();
-        mRecorder = null;
+        if (mRecorder != null) {
+            // Stops recording and releases MediaRecorder resources
+            mRecorder.stop();
+            mRecorder.reset();
+            mRecorder.release();
+            mRecorder = null;
+        }
         chronometer.stop();
 
         // Saves the recorded audio file path and updates the current step
