@@ -258,10 +258,10 @@ public class MainActivity extends AppCompatActivity {
         mIsRecording = false;
         updateUI();
 
-        // If all steps have been completed, perform the prediction
-        if (mStep > 3) {
-            performPrediction();
-        }
+//        // If all steps have been completed, perform the prediction
+//        if (mStep > 3) {
+//            performPrediction();
+//        }
     }
 
     private void updateUI() {
@@ -329,7 +329,7 @@ public class MainActivity extends AppCompatActivity {
         String errorMessage = Constants.INTERNAL_ERROR_MESSAGE;
         if (!mPermissionToRecordAccepted) {
             errorMessage = Constants.PERMISSION_DENIED_MESSAGE;
-        } else if (predictionDTO != null) {
+        } else if (predictionDTO != null & predictionDTO.getErrorCause().equals(Constants.AUDIO_TOO_SHORT_ERROR_MESSAGE)) {
             errorMessage = predictionDTO.getErrorCause();
         }
 

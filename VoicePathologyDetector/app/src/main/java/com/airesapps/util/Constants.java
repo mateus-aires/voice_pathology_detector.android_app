@@ -28,4 +28,5 @@ public class Constants {
     public static final String CONNECTION_ERROR_MESSAGE = "Erro de conexão, verifique sua internet.";
     public static final String INTERNAL_ERROR_MESSAGE = "Erro interno, tente novamente.";
     public static final String PERMISSION_DENIED_MESSAGE = "Permissão de gravação negada.";
+    public static final String AUDIO_TOO_SHORT_ERROR_MESSAGE = "Gravação audível muito curta. Fale por mais de três segundos.";
 }
